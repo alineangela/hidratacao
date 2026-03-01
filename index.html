@@ -26,23 +26,25 @@
     --radius-lg: 12px;
   }
 
-  /* ── BODY CENTRALIZADO COM FLEX ── */
+  html, body {
+    height: 100%;
+  }
+
   body {
     background: transparent;
     color: var(--text);
     font-family: -apple-system, 'Segoe UI', sans-serif;
     font-size: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 16px;
   }
 
-  /* ── WIDGET RESPONSIVO ── */
   .widget {
     width: 100%;
-    max-width: 360px;
+    max-width: 320px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -447,24 +449,6 @@
     0%   { transform: translate(0,0) scale(1); opacity: 0.5; }
     100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
   }
-
-  /* ── RESPONSIVIDADE ── */
-  @media (max-width: 400px) {
-    body {
-      font-size: 12px;
-      padding: 8px;
-      align-items: flex-start;
-      padding-top: 24px;
-    }
-
-    .count-num { font-size: 34px; }
-    .header { padding: 12px 14px 10px; }
-    .vessel-section { padding: 12px 14px; gap: 12px; }
-    .drops-section, .chart-section { padding: 10px 14px; }
-    .footer { padding: 10px 14px 12px; }
-    .edit-panel { margin: 0 14px 12px; }
-    .section-divider { margin: 0 14px; }
-  }
 </style>
 </head>
 <body>
@@ -474,6 +458,7 @@
   <!-- HEADER -->
   <div class="header">
     <div class="header-left">
+      <!-- Notion-style water droplet icon -->
       <svg class="header-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M10 2C10 2 4 9 4 13C4 16.3 6.7 19 10 19C13.3 19 16 16.3 16 13C16 9 10 2 10 2Z"
               fill="#2b7fff" fill-opacity="0.15" stroke="#2b7fff" stroke-width="1.4"/>
@@ -711,7 +696,7 @@
   function calcStreak() {
     let s = 0, d = new Date();
     d.setDate(d.getDate() - 1);
-    while (s &lt; 366) {
+    while (s < 366) {
       const k = d.toISOString().slice(0,10);
       if ((history[k]||0) >= config.goal) { s++; d.setDate(d.getDate()-1); } else break;
     }
@@ -732,9 +717,9 @@
     const grid = document.getElementById('dropsGrid');
     grid.innerHTML = '';
     const sz = config.goal > 16 ? 18 : config.goal > 12 ? 20 : 22;
-    for (let i = 0; i &lt; config.goal; i++) {
+    for (let i = 0; i < config.goal; i++) {
       const div = document.createElement('div');
-      div.className = 'drop' + (i &lt; count ? ' active' : '');
+      div.className = 'drop' + (i < count ? ' active' : '');
       div.style.width = div.style.height = sz + 'px';
       div.innerHTML = `<svg width="${sz}" height="${sz}" viewBox="0 0 22 28" fill="none">
         <path class="drop-fill"
@@ -746,7 +731,7 @@
       const idx = i;
       div.onclick = e => {
         e.stopPropagation();
-        if (idx &lt; count) { setCount(idx+1); render(false); }
+        if (idx < count) { setCount(idx+1); render(false); }
         else             { setCount(idx+1); render(true);  }
       };
       grid.appendChild(div);
@@ -799,7 +784,7 @@
   function spawnParticles(e) {
     const w = document.getElementById('widget');
     const r = w.getBoundingClientRect();
-    for (let i = 0; i &lt; 7; i++) {
+    for (let i = 0; i < 7; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
       const sz  = 2 + Math.random()*4;
