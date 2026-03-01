@@ -1,1 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hidratação</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --bg: transparent;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-2: #4a4a4a;
+    --text-3: #888888;
+    --border: #d4d4d2;
+    --border-hover: #b0b0ae;
+    --fill-bg: #efefed;
+    --water: #2b7fff;
+    --water-light: #6ea9ff;
+    --water-pale: #dbeafe;
+    --active-bg: #f0f6ff;
+    --tag-bg: #e6e6e4;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  /* ── BODY CENTRALIZADO COM FLEX ── */
+  body {
+    background: transparent;
+    color: var(--text);
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  /* ── WIDGET RESPONSIVO ── */
+  .widget {
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-icon {
+    width: 20px; height: 20px;
+    opacity: 0.7;
+  }
+
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .date-badge {
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── VESSEL SECTION ── */
+  .vessel-section {
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+  }
+
+  .vessel-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .vessel-svg {
+    cursor: pointer;
+    display: block;
+    transition: opacity 0.15s;
+  }
+  .vessel-svg:hover { opacity: 0.85; }
+
+  /* Type toggle */
+  .type-toggle {
+    display: flex;
+    gap: 2px;
+    background: var(--tag-bg);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+  }
+
+  .type-btn {
+    width: 26px; height: 20px;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--text-3);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    padding: 0;
+  }
+  .type-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .type-btn:hover:not(.active) { color: var(--text-2); }
+
+  /* ── STATS ── */
+  .stats-col { flex: 1; }
+
+  .count-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 2px;
+  }
+
+  .count-num {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .count-total {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-3);
+    letter-spacing: -0.01em;
+  }
+
+  .goal-desc {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .edit-btn {
+    font-size: 11px;
+    color: var(--text-2);
+    background: none;
+    border: 1px solid var(--border-hover);
+    cursor: pointer;
+    padding: 1px 7px;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .edit-btn:hover {
+    background: var(--tag-bg);
+    color: var(--text);
+    border-color: #a0a09e;
+  }
+
+  /* ── ADD/REMOVE BUTTONS ── */
+  .btns { display: flex; gap: 6px; }
+
+  .btn {
+    flex: 1; height: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.12s;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+
+  .btn-add {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+  .btn-add:hover { background: #333; }
+  .btn-add:active { transform: scale(0.97); }
+
+  .btn-remove {
+    background: transparent;
+    color: var(--text-2);
+  }
+  .btn-remove:hover { background: var(--tag-bg); color: var(--text); }
+  .btn-remove:active { transform: scale(0.97); }
+
+  /* ── EDIT PANEL ── */
+  .edit-panel {
+    display: none;
+    flex-direction: column; gap: 8px;
+    margin: 0 16px 14px;
+    background: var(--fill-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+  }
+  .edit-panel.open { display: flex; animation: fade-in 0.15s ease; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .edit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-2);
+  }
+  .edit-row label { flex: 1; }
+
+  .num-wrap {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .vol-input {
+    width: 56px;
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 4px 6px;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text);
+    text-align: right;
+    outline: none;
+    background: transparent;
+    -moz-appearance: textfield;
+  }
+  .vol-input::-webkit-inner-spin-button,
+  .vol-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .vol-input:focus { background: var(--active-bg); }
+
+  .spin-btns {
+    display: flex;
+    flex-direction: column;
+  }
+  .spin-btn {
+    background: none; border: none;
+    padding: 0 5px; font-size: 9px;
+    color: var(--text-3); cursor: pointer;
+    transition: all 0.1s;
+    height: 14px; display: flex; align-items: center;
+    font-family: inherit;
+  }
+  .spin-btn:hover { background: var(--tag-bg); color: var(--text); }
+
+  .edit-hint {
+    font-size: 11px;
+    color: var(--water);
+    background: var(--active-bg);
+    border: 1px solid #4a90e2;
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+  }
+
+  .edit-apply {
+    align-self: flex-end;
+    background: var(--text);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .edit-apply:hover { background: #333; }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 16px;
+  }
+
+  /* ── DROPS SECTION ── */
+  .drops-section {
+    padding: 12px 16px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+
+  .drops-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .drop { cursor: pointer; transition: transform 0.12s, opacity 0.12s; }
+  .drop:hover { transform: scale(1.15); }
+  .drop.active svg .drop-fill { fill: var(--water); }
+  .drop.active svg .drop-stroke { stroke: var(--water); opacity: 0.3; }
+  .drop:not(.active) svg .drop-fill { fill: var(--border); }
+  .drop:not(.active) svg .drop-stroke { stroke: transparent; }
+
+  @keyframes drop-pop {
+    0%   { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+    70%  { transform: scale(1.25) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .drop.pop { animation: drop-pop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+  /* Progress bar */
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--water);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── CHART SECTION ── */
+  .chart-section {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 44px;
+    margin-top: 10px;
+  }
+
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .bar {
+    width: 100%;
+    background: var(--border);
+    border-radius: 2px 2px 0 0;
+    transition: height 0.4s ease;
+  }
+  .bar.filled { background: var(--water-pale); }
+  .bar.today  { background: var(--water); }
+
+  .bar-day {
+    font-size: 9px;
+    color: var(--text-3);
+    letter-spacing: 0.01em;
+  }
+  .bar-day.today-label { color: var(--water); font-weight: 600; }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 10px 16px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .streak {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .streak b { color: var(--text-2); font-weight: 500; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%) translateY(-50px);
+    background: var(--text);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── PARTICLES ── */
+  .particle {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    background: var(--water);
+    opacity: 0.5;
+    animation: particle-fly 0.7s ease-out forwards;
+  }
+  @keyframes particle-fly {
+    0%   { transform: translate(0,0) scale(1); opacity: 0.5; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+
+  /* ── RESPONSIVIDADE ── */
+  @media (max-width: 400px) {
+    body {
+      font-size: 12px;
+      padding: 8px;
+      align-items: flex-start;
+      padding-top: 24px;
+    }
+
+    .count-num { font-size: 34px; }
+    .header { padding: 12px 14px 10px; }
+    .vessel-section { padding: 12px 14px; gap: 12px; }
+    .drops-section, .chart-section { padding: 10px 14px; }
+    .footer { padding: 10px 14px 12px; }
+    .edit-panel { margin: 0 14px 12px; }
+    .section-divider { margin: 0 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="widget" id="widget" style="position:relative">
+  <div class="toast" id="toast"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <svg class="header-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 2C10 2 4 9 4 13C4 16.3 6.7 19 10 19C13.3 19 16 16.3 16 13C16 9 10 2 10 2Z"
+              fill="#2b7fff" fill-opacity="0.15" stroke="#2b7fff" stroke-width="1.4"/>
+      </svg>
+      <span class="title">Hidratação</span>
+    </div>
+    <span class="date-badge" id="dateBadge">—</span>
+  </div>
+
+  <!-- VESSEL + STATS -->
+  <div class="vessel-section">
+    <div class="vessel-col">
+      <svg class="vessel-svg" id="vesselSvg" width="60" height="130"
+           viewBox="0 0 60 130" onclick="addDrop(event)" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="wGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6ea9ff"/>
+            <stop offset="100%" stop-color="#2b7fff"/>
+          </linearGradient>
+          <clipPath id="bottleClip">
+            <path d="M22 2 L38 2 Q41 2 41 5 L41 10 L36 10 L36 22 Q52 22 52 30 L52 118 Q52 126 44 126 L16 126 Q8 126 8 118 L8 30 Q8 22 24 22 L24 10 L19 10 L19 5 Q19 2 22 2 Z"/>
+          </clipPath>
+          <clipPath id="cupClip">
+            <path d="M8 66 L52 66 L56 120 Q56 127 49 127 L11 127 Q4 127 4 120 Z"/>
+          </clipPath>
+        </defs>
+
+        <!-- BOTTLE -->
+        <g id="shapeBottle">
+          <path d="M22 2 L38 2 Q41 2 41 5 L41 10 L36 10 L36 22 Q52 22 52 30 L52 118 Q52 126 44 126 L16 126 Q8 126 8 118 L8 30 Q8 22 24 22 L24 10 L19 10 L19 5 Q19 2 22 2 Z"
+                fill="#f7f7f5"/>
+          <g clip-path="url(#bottleClip)">
+            <rect id="bottleWaterRect" x="-5" y="130" width="70" height="0" fill="url(#wGrad)"/>
+            <g id="bottleWaveY" transform="translate(0,130)">
+              <path d="M-60 0 C-45 -7 -30 7 -15 0 C0 -7 15 7 30 0 C45 -7 60 7 75 0 C90 -7 105 7 120 0 L120 130 L-60 130 Z"
+                    fill="rgba(255,255,255,0.2)"/>
+            </g>
+          </g>
+          <path d="M22 2 L38 2 Q41 2 41 5 L41 10 L36 10 L36 22 Q52 22 52 30 L52 118 Q52 126 44 126 L16 126 Q8 126 8 118 L8 30 Q8 22 24 22 L24 10 L19 10 L19 5 Q19 2 22 2 Z"
+                fill="none" stroke="#d0d0ce" stroke-width="1.2"/>
+          <path d="M11 36 Q11 90 11 116" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </g>
+
+        <!-- CUP -->
+        <g id="shapeCup" style="display:none">
+          <path d="M8 66 L52 66 L56 120 Q56 127 49 127 L11 127 Q4 127 4 120 Z" fill="#f7f7f5"/>
+          <g clip-path="url(#cupClip)">
+            <rect id="cupWaterRect" x="-5" y="130" width="70" height="0" fill="url(#wGrad)"/>
+            <g id="cupWaveY" transform="translate(0,130)">
+              <path d="M-60 0 C-45 -7 -30 7 -15 0 C0 -7 15 7 30 0 C45 -7 60 7 75 0 C90 -7 105 7 120 0 L120 130 L-60 130 Z"
+                    fill="rgba(255,255,255,0.2)"/>
+            </g>
+          </g>
+          <path d="M8 66 L52 66 L56 120 Q56 127 49 127 L11 127 Q4 127 4 120 Z"
+                fill="none" stroke="#d0d0ce" stroke-width="1.2"/>
+          <path d="M11 76 Q11 110 11 118" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </g>
+      </svg>
+
+      <div class="type-toggle">
+        <button class="type-btn active" id="btnBottle" onclick="setType('bottle')" title="Garrafa">
+          <svg width="11" height="16" viewBox="0 0 11 16" fill="none">
+            <rect x="3.5" y="0.5" width="4" height="2.5" rx="0.8" stroke="currentColor" stroke-width="1"/>
+            <path d="M3.5 3 Q1.5 3.8 1.5 5.5 L1.5 13.5 Q1.5 15 3 15 L8 15 Q9.5 15 9.5 13.5 L9.5 5.5 Q9.5 3.8 7.5 3"
+                  stroke="currentColor" stroke-width="1" fill="none"/>
+          </svg>
+        </button>
+        <button class="type-btn" id="btnCup" onclick="setType('cup')" title="Copo">
+          <svg width="13" height="11" viewBox="0 0 13 11" fill="none">
+            <path d="M0.5 0.5 L12.5 0.5 L10.5 10 Q10.5 10.5 10 10.5 L3 10.5 Q2.5 10.5 2.5 10 Z"
+                  stroke="currentColor" stroke-width="1" fill="none"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-col">
+      <div class="count-row">
+        <span class="count-num" id="countDisplay">0</span>
+        <span class="count-total" id="unitDisplay">/ 4</span>
+      </div>
+      <div class="goal-desc">
+        <span id="goalDesc">garrafas de <strong style="color:var(--text-2);font-weight:500">500ml</strong></span>
+        <button class="edit-btn" onclick="toggleVolPanel()">Editar</button>
+      </div>
+      <div class="btns">
+        <button class="btn btn-add" onclick="addDrop(event)">+</button>
+        <button class="btn btn-remove" onclick="removeDrop()">−</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT PANEL -->
+  <div class="edit-panel" id="volPanel">
+    <div class="edit-row">
+      <label>Meta diária total (ml)</label>
+      <div class="num-wrap">
+        <input class="vol-input" id="inputTotalMl" type="number" min="100" max="10000" step="100" value="2000">
+        <div class="spin-btns">
+          <button class="spin-btn" onclick="spinInput('inputTotalMl', 100)">▴</button>
+          <button class="spin-btn" onclick="spinInput('inputTotalMl', -100)">▾</button>
+        </div>
+      </div>
+    </div>
+    <div class="edit-row">
+      <label>Volume do recipiente (ml)</label>
+      <div class="num-wrap">
+        <input class="vol-input" id="inputContainerMl" type="number" min="50" max="5000" step="50" value="500">
+        <div class="spin-btns">
+          <button class="spin-btn" onclick="spinInput('inputContainerMl', 50)">▴</button>
+          <button class="spin-btn" onclick="spinInput('inputContainerMl', -50)">▾</button>
+        </div>
+      </div>
+    </div>
+    <div class="edit-hint" id="volHint">→ 4 garrafas necessárias</div>
+    <button class="edit-apply" onclick="applyVolume()">Aplicar</button>
+  </div>
+
+  <!-- DROPS -->
+  <div class="section-divider"></div>
+  <div class="drops-section">
+    <div class="section-title">Registro</div>
+    <div class="drops-grid" id="dropsGrid"></div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-section">
+    <div class="section-title">Últimos 7 dias</div>
+    <div class="bars" id="barsGraph"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="streak">
+      <span>🔥</span>
+      <span>Sequência: <b id="streakCount">0</b> dias</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const KEY  = 'hydro_notion';
+
+  let config  = { totalMl: 2000, containerMl: 500, goal: 4, type: 'bottle' };
+  let history = {};
+
+  function load() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(KEY)) || {};
+      if (raw.config)  config  = Object.assign(config, raw.config);
+      if (raw.history) history = raw.history;
+    } catch {}
+  }
+  function save() { localStorage.setItem(KEY, JSON.stringify({ config, history })); }
+
+  function todayKey() { return new Date().toISOString().slice(0,10); }
+  function getCount() { return history[todayKey()] || 0; }
+  function setCount(n) {
+    history[todayKey()] = Math.max(0, Math.min(config.goal, n));
+    save();
+  }
+  function calcGoal(t, c) { return Math.max(1, Math.ceil(t / c)); }
+
+  function spinInput(id, delta) {
+    const el = document.getElementById(id);
+    el.value = Math.max(+el.min||0, Math.min(+el.max||99999, (+el.value||0) + delta));
+    updateHint();
+  }
+
+  function updateVesselFill(count) {
+    const isCup = config.type === 'cup';
+    const top   = isCup ? 68  : 2;
+    const bot   = isCup ? 127 : 126;
+    const h     = bot - top;
+    const pct   = Math.min(count / config.goal, 1);
+    const wH    = h * pct;
+    const wY    = bot - wH;
+
+    const wr = document.getElementById(isCup ? 'cupWaterRect'  : 'bottleWaterRect');
+    const wg = document.getElementById(isCup ? 'cupWaveY'      : 'bottleWaveY');
+    wr.setAttribute('y', wY);
+    wr.setAttribute('height', wH);
+    wg.setAttribute('transform', `translate(0,${wY})`);
+  }
+
+  function setType(t) {
+    config.type = t;
+    save();
+    document.getElementById('shapeCup').style.display    = t === 'cup'    ? '' : 'none';
+    document.getElementById('shapeBottle').style.display = t === 'bottle' ? '' : 'none';
+    document.getElementById('btnCup').classList.toggle('active',    t === 'cup');
+    document.getElementById('btnBottle').classList.toggle('active', t === 'bottle');
+    updateGoalDesc();
+    updateVesselFill(getCount());
+  }
+
+  function toggleVolPanel() {
+    const p = document.getElementById('volPanel');
+    if (!p.classList.contains('open')) {
+      document.getElementById('inputTotalMl').value     = config.totalMl;
+      document.getElementById('inputContainerMl').value = config.containerMl;
+      updateHint();
+    }
+    p.classList.toggle('open');
+  }
+
+  function updateHint() {
+    const t = +document.getElementById('inputTotalMl').value     || 2000;
+    const c = +document.getElementById('inputContainerMl').value || 500;
+    const g = calcGoal(t, c);
+    const n = config.type === 'bottle' ? (g===1?'garrafa':'garrafas') : (g===1?'copo':'copos');
+    document.getElementById('volHint').textContent = `→ ${g} ${n}`;
+  }
+
+  function applyVolume() {
+    config.totalMl     = Math.max(100, +document.getElementById('inputTotalMl').value     || 2000);
+    config.containerMl = Math.max(50,  +document.getElementById('inputContainerMl').value || 500);
+    config.goal        = calcGoal(config.totalMl, config.containerMl);
+    history[todayKey()] = Math.min(getCount(), config.goal);
+    save();
+    document.getElementById('volPanel').classList.remove('open');
+    render();
+  }
+
+  function updateGoalDesc() {
+    const n = config.type === 'bottle' ? 'garrafas de' : 'copos de';
+    document.getElementById('goalDesc').innerHTML = `${n} <strong style="color:var(--text-2);font-weight:500">${config.containerMl}ml</strong>`;
+    document.getElementById('unitDisplay').textContent = `/ ${config.goal}`;
+  }
+
+  function calcStreak() {
+    let s = 0, d = new Date();
+    d.setDate(d.getDate() - 1);
+    while (s &lt; 366) {
+      const k = d.toISOString().slice(0,10);
+      if ((history[k]||0) >= config.goal) { s++; d.setDate(d.getDate()-1); } else break;
+    }
+    return s;
+  }
+
+  function getLast7() {
+    const today = new Date();
+    return Array.from({length:7}, (_,i) => {
+      const dt = new Date(today);
+      dt.setDate(dt.getDate() - (6-i));
+      const k = dt.toISOString().slice(0,10);
+      return { day: DAYS[dt.getDay()], val: history[k]||0, isToday: i===6 };
+    });
+  }
+
+  function renderDrops(count) {
+    const grid = document.getElementById('dropsGrid');
+    grid.innerHTML = '';
+    const sz = config.goal > 16 ? 18 : config.goal > 12 ? 20 : 22;
+    for (let i = 0; i &lt; config.goal; i++) {
+      const div = document.createElement('div');
+      div.className = 'drop' + (i &lt; count ? ' active' : '');
+      div.style.width = div.style.height = sz + 'px';
+      div.innerHTML = `<svg width="${sz}" height="${sz}" viewBox="0 0 22 28" fill="none">
+        <path class="drop-fill"
+          d="M11 2C11 2 3 11 3 17C3 22 6.5 26 11 26C15.5 26 19 22 19 17C19 11 11 2 11 2Z"/>
+        <path class="drop-stroke"
+          d="M11 2C11 2 3 11 3 17C3 22 6.5 26 11 26C15.5 26 19 22 19 17C19 11 11 2 11 2Z"
+          stroke="currentColor" stroke-width="0.5" fill="none"/>
+      </svg>`;
+      const idx = i;
+      div.onclick = e => {
+        e.stopPropagation();
+        if (idx &lt; count) { setCount(idx+1); render(false); }
+        else             { setCount(idx+1); render(true);  }
+      };
+      grid.appendChild(div);
+    }
+  }
+
+  function renderBars() {
+    const data = getLast7();
+    const c = document.getElementById('barsGraph');
+    c.innerHTML = '';
+    const mx = Math.max(config.goal, ...data.map(d=>d.val));
+    data.forEach(item => {
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      const bar = document.createElement('div');
+      bar.className = 'bar'
+        + (item.val >= config.goal && !item.isToday ? ' filled' : '')
+        + (item.isToday ? ' today' : '');
+      bar.style.height = Math.max(3, (item.val/mx)*44) + 'px';
+      bar.title = `${item.val}/${config.goal}`;
+      const lbl = document.createElement('div');
+      lbl.className = 'bar-day' + (item.isToday ? ' today-label' : '');
+      lbl.textContent = item.isToday ? 'Hoje' : item.day;
+      col.appendChild(bar); col.appendChild(lbl);
+      c.appendChild(col);
+    });
+  }
+
+  function render(animate = false) {
+    const count = getCount();
+    document.getElementById('countDisplay').textContent = count;
+    updateGoalDesc();
+    setType(config.type);
+    updateVesselFill(count);
+    renderDrops(count);
+    renderBars();
+    document.getElementById('progressFill').style.width = (count/config.goal*100) + '%';
+    document.getElementById('streakCount').textContent  = calcStreak();
+
+    if (animate) {
+      const drops = document.querySelectorAll('.drop.active');
+      const last = drops[drops.length-1];
+      if (last) {
+        last.classList.add('pop');
+        last.addEventListener('animationend', () => last.classList.remove('pop'), {once:true});
+      }
+    }
+  }
+
+  function spawnParticles(e) {
+    const w = document.getElementById('widget');
+    const r = w.getBoundingClientRect();
+    for (let i = 0; i &lt; 7; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const sz  = 2 + Math.random()*4;
+      const ang = Math.random()*Math.PI*2;
+      const d   = 20 + Math.random()*40;
+      p.style.cssText = `width:${sz}px;height:${sz}px;
+        left:${(e.clientX||160)-r.left}px;top:${(e.clientY||180)-r.top}px;
+        --tx:${Math.cos(ang)*d}px;--ty:${Math.sin(ang)*d}px;`;
+      w.appendChild(p);
+      setTimeout(() => p.remove(), 720);
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function addDrop(e) {
+    const before = getCount();
+    if (before >= config.goal) { showToast('Meta já atingida ✓'); return; }
+    setCount(before + 1);
+    render(true);
+    if (e) spawnParticles(e);
+    if (before + 1 === config.goal)
+      setTimeout(() => showToast('Meta atingida! 💧'), 300);
+  }
+
+  function removeDrop() { setCount(getCount()-1); render(false); }
+
+  function updateDate() {
+    const now = new Date();
+    document.getElementById('dateBadge').textContent =
+      now.toLocaleDateString('pt-BR', { weekday:'short', day:'numeric', month:'short' });
+  }
+
+  load();
+  updateDate();
+  render();
+
+  document.getElementById('inputTotalMl').addEventListener('input', updateHint);
+  document.getElementById('inputContainerMl').addEventListener('input', updateHint);
+</script>
+</body>
+</html>
